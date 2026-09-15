@@ -1,0 +1,18 @@
+{
+  "version": "v1",
+  "required_suites": [
+    "oracle_regression",
+    "security_regression",
+    "behavior_regression",
+    "tool_regression",
+    "policy_regression",
+    "oracle_independence_regression",
+    "schema_regression",
+    "provenance_regression",
+    "contamination_regression",
+    "revocation_regression",
+    "holdout_regression",
+    "common_mode_regression"
+  ],
+  "rule": "Every patch must be followed by regression; passing old tests does not establish security against new attacks."
+}
