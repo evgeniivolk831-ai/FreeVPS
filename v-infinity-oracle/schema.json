@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["claims", "evidence"],
+  "properties": {
+    "claims": {"type": "array"},
+    "evidence": {"type": "array"}
+  }
+}
