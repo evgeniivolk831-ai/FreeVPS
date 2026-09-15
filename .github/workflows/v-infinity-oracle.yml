@@ -10,11 +10,20 @@ on:
       - 'v-infinity-oracle/**'
       - '.github/workflows/v-infinity-oracle.yml'
 
+permissions:
+  contents: read
+
 jobs:
   oracle:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Compile oracle
+        run: python3 -m py_compile v-infinity-oracle/oracle.py v-infinity-oracle/test_oracle.py
+      - name: Run regression suite
+        working-directory: v-infinity-oracle
+        run: python3 test_oracle.py
       - name: Run positive control
         run: python3 v-infinity-oracle/oracle.py < v-infinity-oracle/examples/pass_control.json | tee /tmp/pass.json
       - name: Assert positive control
