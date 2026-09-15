@@ -1,0 +1,20 @@
+{
+  "claims": [
+    {
+      "id": "independent-check",
+      "state": "OBSERVED",
+      "requires_independence": true,
+      "evidence_ids": ["E-INDEPENDENT-1"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E-INDEPENDENT-1",
+      "state": "OBSERVED",
+      "independent": true,
+      "trust_domain": "independent_verifier",
+      "contamination_status": "CLEAN",
+      "revocation_status": "ACTIVE"
+    }
+  ]
+}
