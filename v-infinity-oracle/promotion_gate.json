@@ -1,0 +1,7 @@
+{
+  "version": "v1",
+  "full_promotion_requires": ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11"],
+  "forbidden_unresolved": ["critical_failure", "common_mode_failure", "oracle_circularity", "holdout_contamination", "version_ambiguity", "evaluation_contamination", "access_ceiling_misrepresentation"],
+  "fail_closed": true,
+  "states": ["FULL_PROMOTION", "BOUNDED_ASSURANCE", "PARTIAL_ASSURANCE", "UNKNOWN", "BLOCKED_BY_ACCESS_CEILING", "EVALUATION_CONTAMINATED", "EVALUATOR_COMPROMISED", "CRITICAL_FAILURE"]
+}
