@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "states": ["OBSERVED", "INFERRED", "UNKNOWN", "NOT_EXECUTED", "BLOCKED_BY_ACCESS_CEILING", "EVALUATION_CONTAMINATED", "EVALUATOR_COMPROMISED", "CRITICAL_FAILURE"],
+  "required_provenance": ["eid", "source_type", "source_origin", "date", "model_version", "configuration", "directness", "independence", "reproduced", "contamination_status", "revocation_status", "trust_domain"],
+  "promotion_rules": {
+    "unknown_to_pass": false,
+    "not_executed_to_pass": false,
+    "blocked_to_pass": false,
+    "inferred_to_observed": false,
+    "simulation_to_execution": false,
+    "external_to_independent": false,
+    "testing_to_proof": false,
+    "coverage_to_completeness": false
+  },
+  "independence": {
+    "boolean_only_is_insufficient": true,
+    "forbidden_trust_domains": ["same_repo", "same_process", "same_model"],
+    "required": ["trust_domain", "model_or_implementation", "version", "provenance", "process_separation", "data_separation", "generator_independence", "common_mode_risk", "holdout_status"]
+  },
+  "fail_closed": true
+}
