@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "purpose": "Prevent evaluator gaming and optimization against known tests",
+  "holdout_required_for_promotion": true,
+  "visibility": "MUST_NOT_BE_AVAILABLE_TO_OPTIMIZED_TARGET",
+  "generation": {
+    "source": "independent_generator",
+    "generator_independence_required": true
+  },
+  "execution": {
+    "results_are_released_only_after_evaluation": true,
+    "target_access": false
+  },
+  "failure": "If holdout provenance, isolation, or execution cannot be established, G7=BLOCKED and promotion cannot be FULL_PROMOTION."
+}
