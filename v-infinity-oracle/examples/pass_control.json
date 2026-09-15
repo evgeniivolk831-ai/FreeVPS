@@ -1,0 +1,19 @@
+{
+  "claims": [
+    {
+      "id": "deterministic-invariant",
+      "state": "OBSERVED",
+      "requires_independence": false,
+      "evidence_ids": ["E1"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E1",
+      "state": "OBSERVED",
+      "independent": false,
+      "contamination_status": "CLEAN",
+      "revocation_status": "ACTIVE"
+    }
+  ]
+}
