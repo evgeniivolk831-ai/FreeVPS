@@ -1,0 +1,25 @@
+name: V-infinity Oracle
+
+on:
+  push:
+    paths:
+      - 'v-infinity-oracle/**'
+      - '.github/workflows/v-infinity-oracle.yml'
+  pull_request:
+    paths:
+      - 'v-infinity-oracle/**'
+      - '.github/workflows/v-infinity-oracle.yml'
+
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run positive control
+        run: python3 v-infinity-oracle/oracle.py < v-infinity-oracle/examples/pass_control.json | tee /tmp/pass.json
+      - name: Assert positive control
+        run: grep -q '"overall": "PASS"' /tmp/pass.json
+      - name: Run fail-closed control
+        run: python3 v-infinity-oracle/oracle.py < v-infinity-oracle/examples/block_unknown.json | tee /tmp/block.json
+      - name: Assert fail-closed behavior
+        run: grep -q '"overall": "BLOCKED"' /tmp/block.json
