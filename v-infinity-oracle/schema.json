@@ -1,8 +1,38 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "required": ["claims", "evidence"],
+  "additionalProperties": true,
   "properties": {
-    "claims": {"type": "array"},
-    "evidence": {"type": "array"}
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "evidence_ids"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "state": {"type": "string"},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "requires_independence": {"type": "boolean"},
+          "contradicting_evidence_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "contamination_status", "revocation_status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "state": {"type": "string"},
+          "contamination_status": {"type": "string"},
+          "revocation_status": {"type": "string"},
+          "independent": {"type": "boolean"},
+          "trust_domain": {"type": "string"},
+          "forbidden_upgrades": {"type": "array"}
+        }
+      }
+    }
   }
 }
