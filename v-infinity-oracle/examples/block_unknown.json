@@ -1,0 +1,11 @@
+{
+  "claims": [
+    {
+      "id": "G2-independent-oracle",
+      "state": "UNKNOWN",
+      "requires_independence": true,
+      "evidence_ids": []
+    }
+  ],
+  "evidence": []
+}
