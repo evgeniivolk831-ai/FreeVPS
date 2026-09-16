@@ -1,0 +1,56 @@
+name: V∞ External Assurance Harness
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Runtime attestation
+        run: python3 v-infinity-assurance-harness/harness.py attest
+      - name: Harness self-test
+        run: python3 v-infinity-assurance-harness/harness.py self-test
+      - name: Fail-closed promotion evaluation
+        run: python3 v-infinity-assurance-harness/promotion_gate.py || test $? -eq 2
+      - name: Upload assurance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v-infinity-assurance-artifacts
+          path: v-infinity-assurance-harness/artifacts/
+
+  external-verifier:
+    needs: harness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout verifier code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download harness artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: v-infinity-assurance-artifacts
+          path: v-infinity-assurance-harness/artifacts/
+      - name: Verify artifact integrity and commit binding
+        run: |
+          python3 v-infinity-assurance-harness/external_verifier.py \
+            --artifacts v-infinity-assurance-harness/artifacts \
+            --expected-commit "$GITHUB_SHA" \
+            --output v-infinity-assurance-harness/artifacts/external_verification.json
+      - name: Re-evaluate promotion fail-closed
+        run: python3 v-infinity-assurance-harness/promotion_gate.py || test $? -eq 2
+      - name: Upload external verification artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v-infinity-external-verification
+          path: v-infinity-assurance-harness/artifacts/

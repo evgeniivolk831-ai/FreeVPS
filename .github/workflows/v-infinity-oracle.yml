@@ -1,0 +1,71 @@
+name: V-infinity Oracle
+
+on:
+  push:
+    paths:
+      - 'v-infinity-oracle/**'
+      - '.github/workflows/v-infinity-oracle.yml'
+  pull_request:
+    paths:
+      - 'v-infinity-oracle/**'
+      - '.github/workflows/v-infinity-oracle.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile all executable controls
+        run: |
+          python3 -m py_compile v-infinity-oracle/oracle.py
+          python3 -m py_compile v-infinity-oracle/validate_policies.py
+          python3 -m py_compile v-infinity-oracle/runtime_attestation.py
+          python3 -m py_compile v-infinity-oracle/holdout_runtime.py
+      - name: Validate policy artifacts
+        working-directory: v-infinity-oracle
+        run: python3 validate_policies.py
+      - name: Runtime environment attestation
+        working-directory: v-infinity-oracle
+        run: python3 runtime_attestation.py | tee /tmp/v-infinity-runtime.json
+      - name: Regression suite
+        working-directory: v-infinity-oracle
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          oracle = Path('oracle.py')
+          def run(doc):
+              p = subprocess.run([sys.executable, str(oracle)], input=json.dumps(doc), text=True, capture_output=True)
+              assert p.returncode == 0, p.stderr
+              return json.loads(p.stdout)
+          clean = {'id':'E1','state':'OBSERVED','contamination_status':'CLEAN','revocation_status':'ACTIVE'}
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['E1']}],'evidence':[clean]})['overall'] == 'PASS'
+          assert run({'claims':[{'id':'C1','state':'UNKNOWN','evidence_ids':['E1']}],'evidence':[clean]})['overall'] == 'BLOCKED'
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['MISSING']}],'evidence':[clean]})['overall'] == 'BLOCKED'
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['E1']},{'id':'C1','state':'OBSERVED','evidence_ids':['E1']}],'evidence':[clean]})['overall'] == 'BLOCKED'
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['E1'],'requires_independence':True}],'evidence':[dict(clean, independent=True, trust_domain='same_repo')]})['overall'] == 'BLOCKED'
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['E1'],'requires_independence':True}],'evidence':[dict(clean, independent=True, trust_domain='independent_verifier')]})['overall'] == 'PASS'
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['E1']}],'evidence':[dict(clean, revocation_status='REVOKED')]})['overall'] == 'BLOCKED'
+          assert run({'claims':[{'id':'C1','state':'OBSERVED','evidence_ids':['E1']}],'evidence':[dict(clean, contamination_status='CONTAMINATED')]})['overall'] == 'BLOCKED'
+          print('V∞ regression suite: PASS')
+          PY
+      - name: Temporal hidden holdout
+        working-directory: v-infinity-oracle
+        run: python3 holdout_runtime.py
+      - name: Run positive control
+        run: python3 v-infinity-oracle/oracle.py < v-infinity-oracle/examples/pass_control.json | tee /tmp/pass.json
+      - name: Assert positive control
+        run: grep -q '"overall": "PASS"' /tmp/pass.json
+      - name: Run fail-closed control
+        run: python3 v-infinity-oracle/oracle.py < v-infinity-oracle/examples/block_unknown.json | tee /tmp/block.json
+      - name: Assert fail-closed behavior
+        run: grep -q '"overall": "BLOCKED"' /tmp/block.json
+      - name: Run independent trust-domain control
+        run: python3 v-infinity-oracle/oracle.py < v-infinity-oracle/examples/independent_trust_domain.json | tee /tmp/independent.json
+      - name: Assert independent trust-domain control
+        run: grep -q '"overall": "PASS"' /tmp/independent.json

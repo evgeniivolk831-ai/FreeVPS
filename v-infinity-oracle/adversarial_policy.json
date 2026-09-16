@@ -1,0 +1,7 @@
+{
+  "version": "v1",
+  "adaptive": true,
+  "required_sequence": ["baseline_attack", "observe_result", "apply_patch", "derive_new_attack", "attack_again", "regression"],
+  "attack_sources": ["previous_failures", "previous_patches", "previous_results", "observed_defenses", "new_attack_surface"],
+  "rule": "A defense is not considered robust merely because it passes a previously known test."
+}
