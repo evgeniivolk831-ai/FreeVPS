@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "artifact_type": "V∞_TRUST_DOMAIN_REGISTRY",
+  "version": "1.0",
+  "domains": {
+    "target": {"role": "TARGET", "trust_domain": "target-runtime", "independence": "NOT_VERIFIED"},
+    "observer": {"role": "OBSERVER", "trust_domain": "harness-runtime", "independence": "NOT_VERIFIED"},
+    "oracle": {"role": "ORACLE", "trust_domain": "oracle-runtime", "independence": "NOT_VERIFIED"},
+    "generator": {"role": "GENERATOR", "trust_domain": "generator-runtime", "independence": "NOT_VERIFIED"},
+    "verifier": {"role": "VERIFIER", "trust_domain": "verifier-runtime", "independence": "NOT_VERIFIED"},
+    "holdout": {"role": "HOLDOUT", "trust_domain": "holdout-store", "independence": "NOT_VERIFIED"}
+  },
+  "rule": "Declared trust-domain separation is metadata; it is not proof of independence."
+}
