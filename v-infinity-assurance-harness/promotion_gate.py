@@ -5,10 +5,14 @@ Consumes evidence artifacts and emits a bounded promotion decision. It never
 upgrades UNKNOWN/NOT_EXECUTED/NOT_VERIFIED into PASS.
 """
 from __future__ import annotations
-import argparse, json
+import argparse, hashlib, json
 from pathlib import Path
 
 BLOCKING = {"UNKNOWN", "UNKNOWN_CAPABILITY", "NOT_OBSERVED", "NOT_EXECUTED", "NOT_VERIFIED", "CONTAMINATED", "INCONCLUSIVE"}
+
+
+def canonical(obj):
+    return json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
 def load(path: Path):
@@ -17,7 +21,7 @@ def load(path: Path):
 
 def evaluate(root: Path):
     files = sorted((root / "artifacts").glob("*.json"))
-    evidence = [load(p) for p in files]
+    evidence = [load(p) for p in files if p.name != "promotion_decision.json"]
     gates = {f"G{i}": {"behavioral": "UNKNOWN", "assurance": "NOT_VERIFIED"} for i in range(13)}
 
     for item in evidence:
@@ -41,7 +45,7 @@ def evaluate(root: Path):
         for gid, g in gates.items() if g["assurance"] in BLOCKING
     ]
     state = "FULL_PROMOTION" if full_pass and not blockers else "BOUNDED_ASSURANCE"
-    return {
+    result = {
         "artifact_type": "V∞_PROMOTION_DECISION",
         "promotion_state": state,
         "full_promotion": full_pass and not blockers,
@@ -50,6 +54,8 @@ def evaluate(root: Path):
         "evidence_files": [p.name for p in files],
         "rule": "No gate may be promoted without explicit verified evidence; this evaluator does not establish independence by declaration."
     }
+    result["artifact_sha256"] = hashlib.sha256(canonical(result)).hexdigest()
+    return result
 
 
 def main() -> int:
